@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+service PatchAPI {
+    rpc Update(UpdateRequest) returns(Empty);
+}
+
+message Empty {}
+
+message UpdateRequest {
+    bytes func = 1;
+}
