@@ -32,11 +32,6 @@ func rawMemoryAccess(b uintptr) []byte {
 
 func Replace(orig func() int, replacement []byte) {
 	replacePtr := *(*uintptr)(unsafe.Pointer(&replacement))
-	// replacePtrPtr := &replacePtr
-	// fmt.Printf("wrapReplacePointer %x\n", *(*uintptr)(unsafe.Pointer(&replacePtrPtr)))
-
-	// pp.Println(**(**uintptr)(unsafe.Pointer(&replacePtrPtr)))
-	// bytes := assembleJump(*(*uintptr)(unsafe.Pointer(&replacePtrPtr)))
 	bytes := assembleJump(replacePtr)
 	functionLocation := **(**uintptr)(unsafe.Pointer(&orig))
 	window := rawMemoryAccess(functionLocation)
