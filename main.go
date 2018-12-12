@@ -9,6 +9,7 @@ import (
 )
 import (
 	"log"
+	"unsafe"
 
 	"github.com/Bo0km4n/lupus/internal/mmap"
 )
@@ -23,9 +24,10 @@ func main() {
 	// ptr := *(*uintptr)(unsafe.Pointer(&newFuncBytes))
 
 	pp.Println(newFuncBytes)
-	newFuncPtr, err := mmap.WriteFuncVal(newFuncBytes)
+	pp.Println(*(*uintptr)(unsafe.Pointer(&newFuncBytes)))
+	newFuncBytes, err := mmap.WriteFuncVal(newFuncBytes)
 	if err != nil {
 		log.Fatal(err)
 	}
-	pp.Println(newFuncPtr)
+	pp.Println(*(*uintptr)(unsafe.Pointer(&newFuncBytes)))
 }

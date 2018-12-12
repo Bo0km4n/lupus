@@ -6,24 +6,23 @@ import (
 	"log"
 	"os"
 	"syscall"
-	"unsafe"
 )
 
 // WriteFuncVal allocates func value as byte array to heap.
-func WriteFuncVal(funcVal []byte) (uintptr, error) {
+// Return allocated bytes.
+func WriteFuncVal(funcVal []byte) ([]byte, error) {
 	f, err := writeFuncValueToTempFile(funcVal)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 	defer f.Close()
 
 	data, err := syscall.Mmap(int(f.Fd()), 0, (len(funcVal)+0xfff)&^0xfff, syscall.PROT_READ|syscall.PROT_WRITE|syscall.PROT_EXEC, syscall.MAP_SHARED)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	ptr := *(*uintptr)(unsafe.Pointer(&data))
-	return ptr, nil
+	return data, nil
 }
 
 func writeFuncValueToTempFile(funcVal []byte) (*os.File, error) {
