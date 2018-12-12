@@ -1,18 +1,24 @@
-package assemble
+package patch
 
 import (
 	"syscall"
 	"unsafe"
 )
 
-func assembleJump(replace uintptr) []byte {
+func assembleJump(to uintptr) []byte {
+	// pp.Println("assembleJump:", to)
+	// pp.Println("assembleJump to >> 0~56", byte(to), byte(to>>8), byte(to>>16), byte(to>>24), byte(to>>32), byte(to>>40), byte(to>>48), byte(to>>56))
 	return []byte{
-		0x48, 0xC7, 0xC2,
-		byte(replace >> 0),
-		byte(replace >> 8),
-		byte(replace >> 16),
-		byte(replace >> 24), // MOV rdx, replace
-		0xFF, 0x22,          // JMP rdx
+		0x48, 0xBA,
+		byte(to),
+		byte(to >> 8),
+		byte(to >> 16),
+		byte(to >> 24),
+		byte(to >> 32),
+		byte(to >> 40),
+		byte(to >> 48),
+		byte(to >> 56), // movabs rdx,to
+		0xFF, 0x22,     // jmp QWORD PTR [rdx]
 	}
 }
 
@@ -24,15 +30,13 @@ func rawMemoryAccess(b uintptr) []byte {
 	return (*(*[0xFF]byte)(unsafe.Pointer(b)))[:]
 }
 
-func Replace(orig, replacement func() int) {
-	// bytes := assembleJump(replacement)
-	// functionLocation := **(**uintptr)(unsafe.Pointer(&orig))
-	// window := rawMemoryAccess(functionLocation)
+func Replace(orig func() int, replacement []byte) {
+	replacePtr := *(*uintptr)(unsafe.Pointer(&replacement))
+	bytes := assembleJump(replacePtr)
+	functionLocation := **(**uintptr)(unsafe.Pointer(&orig))
+	window := rawMemoryAccess(functionLocation)
 
-	// page := getPage(functionLocation)
-	// syscall.Mprotect(page, syscall.PROT_READ|syscall.PROT_WRITE|syscall.PROT_EXEC)
-
-	// pp.Println("sizeof func", unsafe.Sizeof(functionLocation))
-	// fmt.Printf("%x\n", bytes)
-	// copy(window, bytes)
+	page := getPage(functionLocation)
+	syscall.Mprotect(page, syscall.PROT_READ|syscall.PROT_WRITE|syscall.PROT_EXEC)
+	copy(window, bytes)
 }

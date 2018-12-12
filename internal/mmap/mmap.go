@@ -17,7 +17,7 @@ func WriteFuncVal(funcVal []byte) ([]byte, error) {
 	}
 	defer f.Close()
 
-	data, err := syscall.Mmap(int(f.Fd()), 0, (len(funcVal)+0xfff)&^0xfff, syscall.PROT_READ|syscall.PROT_WRITE|syscall.PROT_EXEC, syscall.MAP_SHARED)
+	data, err := syscall.Mmap(int(f.Fd()), 0, (len(funcVal)+0xfff)&^0xfff, syscall.PROT_READ|syscall.PROT_WRITE|syscall.PROT_EXEC, syscall.MAP_PRIVATE)
 	if err != nil {
 		return nil, err
 	}

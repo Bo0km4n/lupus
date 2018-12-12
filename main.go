@@ -1,33 +1,35 @@
 package main
 
 import (
-	"github.com/k0kubun/pp"
-
-	"C"
-
-	"github.com/Bo0km4n/lupus/internal/elf"
-)
-import (
 	"log"
 	"unsafe"
 
 	"github.com/Bo0km4n/lupus/internal/mmap"
+	"github.com/Bo0km4n/lupus/internal/patch"
+	"github.com/k0kubun/pp"
 )
 
 func f1() int {
-	return 1
+	return 2
 }
 
 func main() {
-	elfFile, _ := elf.Open("/Users/bo0km4n/go/src/github.com/Bo0km4n/lupus/example/example")
-	newFuncBytes := elf.GetFuncBytes(elfFile, "main.f2")
+	// elfFile, _ := elf.Open("/home/vagrant/dev/lupus/example/example")
+	// newFuncBytes := elf.GetFuncBytes(elfFile, "main.f2")
 	// ptr := *(*uintptr)(unsafe.Pointer(&newFuncBytes))
 
-	pp.Println(newFuncBytes)
-	pp.Println(*(*uintptr)(unsafe.Pointer(&newFuncBytes)))
+	// debug
+	// mov
+	newFuncBytes := []byte{0x49, 0xC7, 0xC2, 0x01, 0x00, 0x00, 0x00}
+
+	pp.Println(len(newFuncBytes))
 	newFuncBytes, err := mmap.WriteFuncVal(newFuncBytes)
+	pp.Println(*(*uintptr)(unsafe.Pointer(&newFuncBytes)))
+	pp.Println(newFuncBytes[0:100])
 	if err != nil {
 		log.Fatal(err)
 	}
-	pp.Println(*(*uintptr)(unsafe.Pointer(&newFuncBytes)))
+	a := f1
+	patch.Replace(a, newFuncBytes)
+	a()
 }
