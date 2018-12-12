@@ -5,8 +5,6 @@ import (
 	"io"
 	"os"
 	"strings"
-
-	"github.com/k0kubun/pp"
 )
 
 type elfFile struct {
@@ -36,7 +34,6 @@ func GetFuncBytes(elfFile *elfFile, funcName string) []byte {
 	var fSymbol elf.Symbol
 	for _, s := range symbols {
 		if strings.Contains(s.Name, funcName) {
-			pp.Println(s)
 			fSymbol = s
 		}
 	}
