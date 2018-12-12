@@ -5,6 +5,8 @@ import (
 	"io"
 	"os"
 	"strings"
+
+	"github.com/k0kubun/pp"
 )
 
 type elfFile struct {
@@ -40,6 +42,7 @@ func GetFuncBytes(elfFile *elfFile, funcName string) []byte {
 	textSection := elfFile.elf.Section(".text")
 	fAddr := fSymbol.Value - textSection.Addr
 	textb := getSectionBytes(textSection)
+	pp.Println(len(textb), fAddr, fAddr+fSymbol.Size)
 	return textb[fAddr : fAddr+fSymbol.Size]
 }
 

@@ -18,7 +18,7 @@ func assembleJump(to uintptr) []byte {
 		byte(to >> 40),
 		byte(to >> 48),
 		byte(to >> 56), // movabs rdx,to
-		0xFF, 0x22,     // jmp QWORD PTR [rdx]
+		0xFF, 0xe2,     // jmp rdx
 	}
 }
 
@@ -32,6 +32,11 @@ func rawMemoryAccess(b uintptr) []byte {
 
 func Replace(orig func() int, replacement []byte) {
 	replacePtr := *(*uintptr)(unsafe.Pointer(&replacement))
+	// replacePtrPtr := &replacePtr
+	// fmt.Printf("wrapReplacePointer %x\n", *(*uintptr)(unsafe.Pointer(&replacePtrPtr)))
+
+	// pp.Println(**(**uintptr)(unsafe.Pointer(&replacePtrPtr)))
+	// bytes := assembleJump(*(*uintptr)(unsafe.Pointer(&replacePtrPtr)))
 	bytes := assembleJump(replacePtr)
 	functionLocation := **(**uintptr)(unsafe.Pointer(&orig))
 	window := rawMemoryAccess(functionLocation)
