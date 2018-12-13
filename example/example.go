@@ -1,11 +1,13 @@
 package main
 
+import "fmt"
+
 func f1() int {
+	fmt.Println("hoge")
 	return 1
 }
 
 func f2() int {
-	// fmt.Println("hoge")
 	return 2
 }
 

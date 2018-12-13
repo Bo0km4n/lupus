@@ -1,6 +1,7 @@
 package patch
 
 import (
+	"reflect"
 	"syscall"
 	"unsafe"
 )
@@ -26,17 +27,41 @@ func getPage(p uintptr) []byte {
 	return (*(*[0xFFFFFF]byte)(unsafe.Pointer(p & ^uintptr(syscall.Getpagesize()-1))))[:syscall.Getpagesize()]
 }
 
-func rawMemoryAccess(b uintptr) []byte {
-	return (*(*[0xFF]byte)(unsafe.Pointer(b)))[:]
+func rawMemoryAccess(p uintptr, length int) []byte {
+	return *(*[]byte)(unsafe.Pointer(&reflect.SliceHeader{
+		Data: p,
+		Len:  length,
+		Cap:  length,
+	}))
 }
 
-func Replace(orig func() int, replacement []byte) {
+func Replace(orig uintptr, replacement []byte) {
 	replacePtr := *(*uintptr)(unsafe.Pointer(&replacement))
-	bytes := assembleJump(replacePtr)
-	functionLocation := **(**uintptr)(unsafe.Pointer(&orig))
-	window := rawMemoryAccess(functionLocation)
+	jumpData := assembleJump(replacePtr)
+	f := rawMemoryAccess(orig, len(jumpData))
+	original := make([]byte, len(f))
+	copy(original, f)
 
-	page := getPage(functionLocation)
-	syscall.Mprotect(page, syscall.PROT_READ|syscall.PROT_WRITE|syscall.PROT_EXEC)
-	copy(window, bytes)
+	copyToLocation(orig, jumpData)
+	return
+}
+
+func copyToLocation(location uintptr, data []byte) {
+	f := rawMemoryAccess(location, len(data))
+
+	page := rawMemoryAccess(pageStart(location), syscall.Getpagesize())
+	err := syscall.Mprotect(page, syscall.PROT_READ|syscall.PROT_WRITE|syscall.PROT_EXEC)
+	if err != nil {
+		panic(err)
+	}
+	copy(f, data[:])
+
+	err = syscall.Mprotect(page, syscall.PROT_READ|syscall.PROT_EXEC)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func pageStart(ptr uintptr) uintptr {
+	return ptr & ^(uintptr(syscall.Getpagesize() - 1))
 }
