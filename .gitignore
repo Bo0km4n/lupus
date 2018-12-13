@@ -1,4 +1,6 @@
 example/example
 example/example.s
 example/simple/simple
+*.a
+*.o
 lupus
