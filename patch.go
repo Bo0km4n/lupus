@@ -1,4 +1,4 @@
-package patch
+package lupus
 
 import (
 	"reflect"
@@ -35,12 +35,12 @@ func rawMemoryAccess(p uintptr, length int) []byte {
 	}))
 }
 
-func Replace(orig uintptr, replacement []byte) {
+func replace(orig uintptr, replacement []byte) {
 	replacePtr := *(*uintptr)(unsafe.Pointer(&replacement))
 	jumpData := assembleJump(replacePtr)
-	f := rawMemoryAccess(orig, len(jumpData))
-	original := make([]byte, len(f))
-	copy(original, f)
+	// f := rawMemoryAccess(orig, len(jumpData))
+	// original := make([]byte, len(f))
+	// copy(original, f)
 
 	copyToLocation(orig, jumpData)
 	return
@@ -55,11 +55,6 @@ func copyToLocation(location uintptr, data []byte) {
 		panic(err)
 	}
 	copy(f, data[:])
-
-	err = syscall.Mprotect(page, syscall.PROT_READ|syscall.PROT_EXEC)
-	if err != nil {
-		panic(err)
-	}
 }
 
 func pageStart(ptr uintptr) uintptr {

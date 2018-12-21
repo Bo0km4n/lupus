@@ -1,4 +1,4 @@
-package elf
+package lupus
 
 import (
 	"debug/elf"
@@ -20,7 +20,7 @@ func openElf(r io.ReaderAt) (*elfFile, error) {
 }
 
 // Open loads elf format binary file.
-func Open(name string) (*elfFile, error) {
+func open(name string) (*elfFile, error) {
 	f, err := os.Open(name)
 	if err != nil {
 		panic(err)
@@ -29,7 +29,7 @@ func Open(name string) (*elfFile, error) {
 }
 
 // GetFuncBytes loads function assembler instructions.
-func GetFuncBytes(elfFile *elfFile, funcName string) []byte {
+func getFuncBytes(elfFile *elfFile, funcName string) []byte {
 	symbols, _ := elfFile.elf.Symbols()
 	var fSymbol elf.Symbol
 	for _, s := range symbols {

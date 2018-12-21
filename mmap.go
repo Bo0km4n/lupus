@@ -1,4 +1,4 @@
-package mmap
+package lupus
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 
 // WriteFuncVal allocates func value as byte array to heap.
 // Return allocated bytes.
-func WriteFuncVal(funcVal []byte) ([]byte, error) {
+func writeFuncVal(funcVal []byte) ([]byte, error) {
 	f, err := writeFuncValueToTempFile(funcVal)
 	if err != nil {
 		return nil, err
